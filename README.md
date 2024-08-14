@@ -11,6 +11,8 @@ This README file will focus on the actuator features implementation. For more in
 - [Info Endpoint](#info-endpoint)
 - [Health Endpoint](#health-endpoint)
 - [Metrics Endpoints](#metrics-endpoints)
+  - [Custom Metrics](#custom-metrics)
+- [Securing Actuator Endpoints with Spring Security](#securing-actuator-endpoints-with-spring-security)
 
 ## Dependencies
 
@@ -37,6 +39,18 @@ management:
         include: "*" # Expose all endpoints
 ```
 The shutdown endpoint is not exposed because it is not enabled (it is disabled by default). 
+
+### Enabling the Shutdown Endpoint
+
+The shutdown endpoint is used to shutdown the application and so, it is disabled by default. 
+To enable this endpoint, the following configuration must be added to the `application.yaml` file.
+
+```yaml
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+```
 
 ## Info Endpoint
 
