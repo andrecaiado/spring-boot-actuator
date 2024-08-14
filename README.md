@@ -178,3 +178,20 @@ This metric will be available at [http://localhost:8080/actuator/metrics/employe
 ```
 
 ## Securing Actuator Endpoints with Spring Security
+
+To secure the actuator endpoints, we can use Spring Security.
+
+The following dependency was added to enable Spring Security in the Spring Boot application.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+A configuration was added to secure the `shutdown` actuator endpoint with HTTP Basic Authentication.
+
+The configuration also includes an inMemory user with credentials to access the `shutdown` endpoint.
+
+The configuration can be found in the [SecurityConfig.java](src%2Fmain%2Fjava%2Fcom%2Fexample%2Fspringboottemplate%2Fconfig%2FSecurityConfig.java) class.
