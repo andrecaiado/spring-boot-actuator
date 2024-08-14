@@ -1,50 +1,166 @@
-# Spring Boot Template project
-This is a template project for Spring Boot applications. 
+# Spring Boot Actuator project
 
-## Features
-- Exposes an API to perform CRUD operations on a single entity
-- Persists the data in a PostgreSQL database
-- Uses Spring Data JPA for database operations
-- Uses Flyway for database migrations
-- Uses Spring Boot Docker Compose to start and stop a Docker container running the PostgreSQL database
-- Includes a datasource configuration for testing purposes that uses the H2 in-memory database
+Spring Boot application with actuator configuration and integration with external monitoring systems
 
-### PostgreSQL database
-The PostrgreSQL configuration is located in `src/main/resources/application.yaml`. 
+This README file will focus on the actuator features implementation. For more information about the other project features, please refer to the project template:  [spring-boot-template](https://github.com/andrecaiado/spring-boot-template). 
 
-The datasource configuration is located in the `docker-compose.yml` file so it can be picked up by Spring Boot Docker Compose.
+## Contents
 
-### Database migrations with Flyway
-Flyway configuration is located in `src/main/resources/application.yaml`.
+- [Dependencies](#dependencies)
+- [Exposing Actuator Endpoints](#exposing-actuator-endpoints)
+- [Info Endpoint](#info-endpoint)
+- [Health Endpoint](#health-endpoint)
+- [Metrics Endpoints](#metrics-endpoints)
 
-The migration files are located at `src/main/resources/db/migration`.
+## Dependencies
 
-### Spring Boot Docker Compose
-With Spring Boot Docker Compose, the container running the PostgreSQL database will be automatically started when the application is started and stopped when the application is stopped.
+The following dependency is required to enable the actuator features in the Spring Boot application.
 
-Spring Boot Docker Compose will detect and use the `docker-compose.yml` file located in the root of the project. 
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
 
-The data source will be configured with the properties defined in the `docker-compose.yml` file.
+## Exposing Actuator Endpoints
 
-### In-memory database for testing
-The datasource configuration is located in `src/test/resources/application.yaml`.
+The actuators endpoints are available at [http://localhost:8080/actuator](http://localhost:8080/actuator). 
 
-When a test loads the application context or explicitly calls this configuration, the H2 in-memory database will be initialized.
+By default, only the `health` and `info` endpoints are exposed over HTTP. To expose all the endpoints, the following configuration was added to the `application.yaml` file.
 
-The migrations will be applied from the files located at `src/main/resources/db/migration`. To apply a different migration to the test database, create the migration files in the `scr/test/resources` and specify the configuration in the `scr/test/resources/application.yaml` file.
+```properties
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # Expose all endpoints
+```
+The shutdown endpoint is not exposed because it is not enabled (it is disabled by default). 
+
+## Info Endpoint
+
+The `info` endpoint is available at http://localhost:8080/actuator/info and is used to display information about the application. 
+
+The information to be displayed must be added to the `application.yaml`.
 
 ```yaml
-spring:
-  application:
-      flyway:
-        locations: classpath:/db/migration
-        schemas: employees
-        baselineOnMigrate: true
-        enabled: true
+info:
+  app:
+    name: @project.name@
+    description: @project.description@
+    version: @project.version@
+    encoding: @project.build.sourceEncoding@
+    java:
+      version: @java.version@
 ```
 
-### Running the application
-To run the application, execute the following command:
-```shell 
-mvn spring-boot:run
+We also have to add the following property to the `application.yaml` so the info contents are displayed in the actuator `info` endpoint.
+
+```yaml
+management:
+  info:
+    env:
+      enabled: true
 ```
+
+## Health Endpoint
+
+By default, the health endpoint only returns the status of the application. The status can be `UP`, `DOWN`, or `UNKNOWN`.
+
+```json
+{
+    "status": "UP"
+}
+```
+If we want to see more details about the application health, we can add the following configuration to the `application.yaml` file.
+
+```yaml
+management:
+  endpoint:
+    health:
+      show-details: always
+```
+
+Now, the health endpoint will return more details about the application health. Because we have a PostgreSQL database configured in the application, the health endpoint will return the status of the database connection.
+
+```json
+{
+  "status": "UP",
+  "components": {
+    "db": {
+      "status": "UP",
+      "details": {
+        "database": "PostgreSQL",
+        "validationQuery": "isValid()"
+      }
+    },
+    "diskSpace": {
+      "status": "UP",
+      "details": {
+        "total": 494384795648,
+        "free": 422728798208,
+        "threshold": 10485760,
+        "path": "/Users/a.caiadodasilva/code/training/spring-boot-actuator/.",
+        "exists": true
+      }
+    },
+    "ping": {
+      "status": "UP"
+    }
+  }
+}
+```
+
+## Metrics Endpoints
+
+The metrics endpoint provides information about the application performance. The metrics are divided into three categories: `system`, `jvm`, and `process`.
+
+The metrics endpoint is available at [http://localhost:8080/actuator/metrics](http://localhost:8080/actuator/metrics).
+
+### Custom Metrics
+
+We can create custom metrics to monitor specific parts of the application.
+
+To learn more about metric types, please refer to the [Prometheus Metric Types page](https://prometheus.io/docs/concepts/metric_types/).
+
+In this project, we created a custom `gauge` metric to monitor the number of employees in the database. This metric was implemented in the `EmployeeService` class as shown below.
+
+```java
+@Service
+@Slf4j
+public class EmployeeService {
+
+    private final EmployeeRepository employeeRepository;
+
+    private final MeterRegistry meterRegistry;
+
+    public EmployeeService(EmployeeRepository employeeRepository, MeterRegistry meterRegistry) {
+        this.employeeRepository = employeeRepository;
+        this.meterRegistry = meterRegistry;
+
+        Gauge.builder("employees_count", employeeRepository::count)
+                .description("The current number of employees in the database")
+                .register(meterRegistry);
+    }
+    ...
+}
+```
+
+This metric will be available at [http://localhost:8080/actuator/metrics/employees_count](http://localhost:8080/actuator/metrics/employees_count).
+
+```json
+{
+  "name": "employees_count",
+  "description": "The current number of employees in the database",
+  "measurements": [
+    {
+      "statistic": "VALUE",
+      "value": 20
+    }
+  ],
+  "availableTags": []
+}
+```
+
+## Securing Actuator Endpoints with Spring Security

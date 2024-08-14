@@ -1,6 +1,8 @@
 package com.example.springboottemplate.service;
 
 import com.example.springboottemplate.entity.Employee;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.example.springboottemplate.repository.EmployeeRepository;
@@ -15,8 +17,15 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    private final MeterRegistry meterRegistry;
+
+    public EmployeeService(EmployeeRepository employeeRepository, MeterRegistry meterRegistry) {
         this.employeeRepository = employeeRepository;
+        this.meterRegistry = meterRegistry;
+
+        Gauge.builder("employees_count", employeeRepository::count)
+                .description("The current number of employees in the database")
+                .register(meterRegistry);
     }
 
     public List<Employee> getAllEmployees(){
