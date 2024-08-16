@@ -6,7 +6,7 @@ This README file will focus on the actuator features implementation. For more in
 
 # Contents
 
-- [Dependencies](#dependencies)
+- [Dependencies and requirements](#dependencies-and-requirements)
 - [Exposing Actuator Endpoints](#exposing-actuator-endpoints)
 - [Info Endpoint](#info-endpoint)
 - [Health Endpoint](#health-endpoint)
@@ -18,17 +18,32 @@ This README file will focus on the actuator features implementation. For more in
     - [Integration with the Spring Boot application](#integration-with-the-spring-boot-application)
     - [Prometheus server](#prometheus-server)
   - [Grafana](#grafana)
+    - [Setting up the Prometheus data source in Grafana](#setting-up-the-prometheus-data-source-in-grafana)
+    - [Importing a Grafana dashboard](#importing-a-grafana-dashboard)
 
-# Dependencies
+# Dependencies and requirements
 
-The following dependency is required to enable the actuator features in the Spring Boot application.
+The following dependency are required to implement this project features:
 
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
 ```
+
+To run the external services (Postgres, Prometheus and Grafana) in Docker containers, the following requirements are needed:
+
+- Docker
+- Docker Compose
 
 # Exposing Actuator Endpoints
 
@@ -246,21 +261,42 @@ The Grafana monitoring system was integrated with the Spring Boot application to
 
 Although Prometheus provides dashboards to visualize the metrics, Grafana is a more powerful tool for this purpose.
 
-The Grafana configuration can be found in the [grafana.yml](grafana.yml) file.
+A Grafana server service was added to the `docker-compose.yml` file to start the Grafana server in a Docker container.
 
 To start the Grafana server, run the following command:
 
 ```shell
-docker-compose up -d grafana
+docker compose up -d grafana
 ```
 
 The Grafana server will be available at [http://localhost:3000](http://localhost:3000).
 
-The default credentials are:
+The default credentials to access Grafana are:
 
 - Username: admin
 - Password: admin
-- Data Source: Prometheus
-- URL: http://localhost:9090
-- Access: Browser
-- Save & Test
+
+Change the password after the first login or skip the password change by clicking on the `Skip` button.
+
+### Setting up the Prometheus data source in Grafana
+
+After logging in, add a new data source to Grafana:
+- Data Source type: Prometheus
+- Prometheus server URL: http://localhost:9090 
+  - It will probably not work since we are running the services in Docker containers. Use `host.docker.internal` instead of `localhost`.
+- Authentication: None
+- Click "Save & Test"
+
+### Importing a Grafana dashboard
+
+Instead of creating a new dashboard from scratch, we can import a pre-built dashboard from the Grafana dashboard library.
+
+Visit the [Grafana dashboard library](https://grafana.com/grafana/dashboards) and search for a dashboard that fits your needs.
+
+To learn about Importing Grafana dashboards, please refer to the [Grafana dashboards documentation](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/).
+
+**Example of an imported dashboard applied on this project:**
+
+Source: [Spring Boot Statistics & Endpoint Metrics](https://grafana.com/grafana/dashboards/14430-spring-boot-statistics-endpoint-metrics/)
+
+![Screenshot 2024-08-16 at 18.05.40.png](src%2Fmain%2Fresources%2FScreenshot%202024-08-16%20at%2018.05.40.png)
