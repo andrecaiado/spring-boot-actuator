@@ -1,10 +1,10 @@
 # Spring Boot Actuator project
 
-Spring Boot application with actuator configuration and integration with external monitoring systems
+Spring Boot application with actuator configuration and integration with external monitoring systems.
 
 This README file will focus on the actuator features implementation. For more information about the other project features, please refer to the project template:  [spring-boot-template](https://github.com/andrecaiado/spring-boot-template). 
 
-## Contents
+# Contents
 
 - [Dependencies](#dependencies)
 - [Exposing Actuator Endpoints](#exposing-actuator-endpoints)
@@ -13,8 +13,13 @@ This README file will focus on the actuator features implementation. For more in
 - [Metrics Endpoints](#metrics-endpoints)
   - [Custom Metrics](#custom-metrics)
 - [Securing Actuator Endpoints with Spring Security](#securing-actuator-endpoints-with-spring-security)
+- [Monitoring Systems Integration](#monitoring-systems-integration)
+  - [Prometheus](#prometheus)
+    - [Integration with the Spring Boot application](#integration-with-the-spring-boot-application)
+    - [Prometheus server](#prometheus-server)
+  - [Grafana](#grafana)
 
-## Dependencies
+# Dependencies
 
 The following dependency is required to enable the actuator features in the Spring Boot application.
 
@@ -25,7 +30,7 @@ The following dependency is required to enable the actuator features in the Spri
 </dependency>
 ```
 
-## Exposing Actuator Endpoints
+# Exposing Actuator Endpoints
 
 The actuators endpoints are available at [http://localhost:8080/actuator](http://localhost:8080/actuator). 
 
@@ -40,7 +45,7 @@ management:
 ```
 The shutdown endpoint is not exposed because it is not enabled (it is disabled by default). 
 
-### Enabling the Shutdown Endpoint
+# Enabling the Shutdown Endpoint
 
 The shutdown endpoint is used to shutdown the application and so, it is disabled by default. 
 To enable this endpoint, the following configuration must be added to the `application.yaml` file.
@@ -52,7 +57,7 @@ management:
       enabled: true
 ```
 
-## Info Endpoint
+# Info Endpoint
 
 The `info` endpoint is available at http://localhost:8080/actuator/info and is used to display information about the application. 
 
@@ -78,7 +83,7 @@ management:
       enabled: true
 ```
 
-## Health Endpoint
+# Health Endpoint
 
 By default, the health endpoint only returns the status of the application. The status can be `UP`, `DOWN`, or `UNKNOWN`.
 
@@ -126,13 +131,13 @@ Now, the health endpoint will return more details about the application health. 
 }
 ```
 
-## Metrics Endpoints
+# Metrics Endpoints
 
 The metrics endpoint provides information about the application performance. The metrics are divided into three categories: `system`, `jvm`, and `process`.
 
 The metrics endpoint is available at [http://localhost:8080/actuator/metrics](http://localhost:8080/actuator/metrics).
 
-### Custom Metrics
+## Custom Metrics
 
 We can create custom metrics to monitor specific parts of the application.
 
@@ -177,7 +182,7 @@ This metric will be available at [http://localhost:8080/actuator/metrics/employe
 }
 ```
 
-## Securing Actuator Endpoints with Spring Security
+# Securing Actuator Endpoints with Spring Security
 
 To secure the actuator endpoints, we can use Spring Security.
 
@@ -195,3 +200,67 @@ A configuration was added to secure the `shutdown` actuator endpoint with HTTP B
 The configuration also includes an inMemory user with credentials to access the `shutdown` endpoint.
 
 The configuration can be found in the [SecurityConfig.java](src%2Fmain%2Fjava%2Fcom%2Fexample%2Fspringboottemplate%2Fconfig%2FSecurityConfig.java) class.
+
+# Monitoring Systems Integration
+
+The Spring Boot application was integrated with two monitoring systems: Prometheus and Grafana.
+
+## Prometheus
+
+### Integration with the Spring Boot application
+
+The Prometheus monitoring system was integrated with the Spring Boot application to collect metrics from the application.
+
+To integrate Prometheus with the Spring Boot application, we used the `micrometer-registry-prometheus` dependency. To learn more about Micrometer, please refer to the [Micrometer documentation](https://micrometer.io/docs).
+
+The following dependency was added to the `pom.xml` file.
+
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+```
+
+After adding the dependency, Spring Boot will automatically configure a `PrometheusMeterRegistry` and a `CollectorRegistry` to collect and export metrics in a format that can be scraped by Prometheus.
+
+The metrics can then be accessed at [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus).
+
+### Prometheus server
+
+A Prometheus server service was added to the `docker-compose.yml` file to start the Prometheus server in a Docker container.  
+
+The configuration for the Prometheus server can be found in the [prometheus.yml](prometheus.yml) file.
+
+To start the Prometheus server, run the following command:
+
+```shell
+docker compose up -d prometheus
+```
+
+The Prometheus server will be available at [http://localhost:9090](http://localhost:9090).
+
+## Grafana
+
+The Grafana monitoring system was integrated with the Spring Boot application to visualize the metrics collected by Prometheus.
+
+Although Prometheus provides dashboards to visualize the metrics, Grafana is a more powerful tool for this purpose.
+
+The Grafana configuration can be found in the [grafana.yml](grafana.yml) file.
+
+To start the Grafana server, run the following command:
+
+```shell
+docker-compose up -d grafana
+```
+
+The Grafana server will be available at [http://localhost:3000](http://localhost:3000).
+
+The default credentials are:
+
+- Username: admin
+- Password: admin
+- Data Source: Prometheus
+- URL: http://localhost:9090
+- Access: Browser
+- Save & Test
