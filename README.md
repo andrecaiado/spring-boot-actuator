@@ -299,4 +299,4 @@ To learn about Importing Grafana dashboards, please refer to the [Grafana dashbo
 
 Source: [Spring Boot Statistics & Endpoint Metrics](https://grafana.com/grafana/dashboards/14430-spring-boot-statistics-endpoint-metrics/)
 
-![Screenshot 2024-08-16 at 18.05.40.png](src%2Fmain%2Fresources%2FScreenshot%202024-08-16%20at%2018.05.40.png)
+![grafana-dashboard.png](src%2Fmain%2Fresources%2Fgrafana-dashboard.png)
