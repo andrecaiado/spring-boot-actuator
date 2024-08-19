@@ -26,6 +26,8 @@ This README file will focus on the actuator features implementation. For more in
 
 # Getting Started
 
+This section provides an overview of the main features, necessary dependencies, and step-by-step instructions to help you get the application up and running quickly.
+
 ## Main features
 
 The main features of this project are:
