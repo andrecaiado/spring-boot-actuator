@@ -1,13 +1,15 @@
 # Spring Boot Actuator project
 
-Spring Boot application with actuator configuration and integration with external monitoring systems (Prometheus and Grafana).
+Spring Boot application with Actuator configuration and integration with external monitoring systems (Prometheus and Grafana).
 
 This README file will focus on the actuator features implementation. For more information about the other project features, please refer to the project template:  [spring-boot-template](https://github.com/andrecaiado/spring-boot-template). 
 
 # Contents
 
-- [Main features](#main-features)
-- [Dependencies and requirements](#dependencies-and-requirements)
+- [Getting Started](#getting-started)
+  - [Main features](#main-features)
+  - [Dependencies and requirements](#dependencies-and-requirements)
+  - [Run the project](#run-the-project)
 - [Exposing Actuator Endpoints](#exposing-actuator-endpoints)
 - [Info Endpoint](#info-endpoint)
 - [Health Endpoint](#health-endpoint)
@@ -21,12 +23,10 @@ This README file will focus on the actuator features implementation. For more in
   - [Grafana](#grafana)
     - [Setting up the Prometheus data source in Grafana](#setting-up-the-prometheus-data-source-in-grafana)
     - [Importing a Grafana dashboard](#importing-a-grafana-dashboard)
-- Run the project
-  - [Run the Spring Boot application](#run-the-spring-boot-application)
-  - [Run the external services](#run-the-external-services)
-- [References](#references)
 
-# Main features
+# Getting Started
+
+## Main features
 
 The main features of this project are:
 - Configures Spring Boot Actuator to expose endpoints over HTTP
@@ -36,7 +36,7 @@ The main features of this project are:
 - Demonstrates how to connect Grafana with Prometheus to visualize metrics (including importing a pre-built dashboard)
 - Spring Security configuration to secure sensitive actuator endpoints
 
-# Dependencies and requirements
+## Dependencies and requirements
 
 The following dependency are required to implement this project features:
 
@@ -55,10 +55,40 @@ The following dependency are required to implement this project features:
 </dependency>
 ```
 
-To run the external services (Postgres, Prometheus and Grafana) in Docker containers, the following requirements are needed:
+To launch and run the external services (Postgres, Prometheus and Grafana) in Docker containers, the following requirements are needed:
 
-- Docker
-- Docker Compose
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+To run the project, the requirements are:
+
+- [Java 17 (or higher)](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html)
+- [Maven](https://maven.apache.org/download.cgi)
+
+## Run the project
+
+To run the project, follow the steps below.
+
+```shell
+mvn spring-boot:run
+```
+
+The application will be available at [http://localhost:8080](http://localhost:8080).
+
+The external services (Postgres, Prometheus, and Grafana) configured in the [docker-compose.yaml](docker-compose.yaml) file will automatically be launched due to the `spring-boot-docker-compose` dependency.
+
+In any case, the external services can also be launched manually by running on of the following command:
+
+```shell
+# Start all the external services
+docker compose up -d
+```
+
+```shell
+# Start a specific external service 
+docker compose up -d <service-name>
+# Replace <service-name> with the service you want to start (prometheus, grafana or postgres)
+```
 
 # Exposing Actuator Endpoints
 
@@ -237,6 +267,8 @@ The Spring Boot application was integrated with two monitoring systems: Promethe
 
 ## Prometheus
 
+Prometheus is an open-source monitoring system that collects metrics from the application and stores them in a time-series data, i.e. metrics information is stored with the timestamp at which it was recorded, alongside optional key-value pairs called labels.
+
 ### Integration with the Spring Boot application
 
 The Prometheus monitoring system was integrated with the Spring Boot application to collect metrics from the application.
@@ -272,7 +304,7 @@ The Prometheus server will be available at [http://localhost:9090](http://localh
 
 ## Grafana
 
-The Grafana monitoring system was integrated with the Spring Boot application to visualize the metrics collected by Prometheus.
+Grafana is an open-source monitoring and observability platform that allows users to visualize metrics collected by Prometheus.
 
 Although Prometheus provides dashboards to visualize the metrics, Grafana is a more powerful tool for this purpose.
 
@@ -315,28 +347,3 @@ To learn about Importing Grafana dashboards, please refer to the [Grafana dashbo
 Source: [Spring Boot Statistics & Endpoint Metrics](https://grafana.com/grafana/dashboards/14430-spring-boot-statistics-endpoint-metrics/)
 
 ![grafana-dashboard.png](src%2Fmain%2Fresources%2Fgrafana-dashboard.png)
-
-# Run the project
-
-To run the project, follow the steps below.
-
-```shell
-mvn spring-boot:run
-```
-
-The application will be available at [http://localhost:8080](http://localhost:8080).
-
-The external services (Postgres, Prometheus, and Grafana) configured in the [docker-compose.yaml](docker-compose.yaml) file will automatically be launched due to the `spring-boot-docker-compose` dependency.
-
-In any case, if you want to run the external services separately, you can run the following command:
-
-```shell
-# Start all the external services
-docker compose up -d
-```
-
-```shell
-# Start a specific service (prometheus, grafana or postgres)
-docker compose up -d <service-name>
-# Replace <service-name> with the service you want to start
-```
