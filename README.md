@@ -1,11 +1,12 @@
 # Spring Boot Actuator project
 
-Spring Boot application with actuator configuration and integration with external monitoring systems.
+Spring Boot application with actuator configuration and integration with external monitoring systems (Prometheus and Grafana).
 
 This README file will focus on the actuator features implementation. For more information about the other project features, please refer to the project template:  [spring-boot-template](https://github.com/andrecaiado/spring-boot-template). 
 
 # Contents
 
+- [Main features](#main-features)
 - [Dependencies and requirements](#dependencies-and-requirements)
 - [Exposing Actuator Endpoints](#exposing-actuator-endpoints)
 - [Info Endpoint](#info-endpoint)
@@ -20,6 +21,20 @@ This README file will focus on the actuator features implementation. For more in
   - [Grafana](#grafana)
     - [Setting up the Prometheus data source in Grafana](#setting-up-the-prometheus-data-source-in-grafana)
     - [Importing a Grafana dashboard](#importing-a-grafana-dashboard)
+- Run the project
+  - [Run the Spring Boot application](#run-the-spring-boot-application)
+  - [Run the external services](#run-the-external-services)
+- [References](#references)
+
+# Main features
+
+The main features of this project are:
+- Configures Spring Boot Actuator to expose endpoints over HTTP
+- Implements a custom metric for example purposes
+- Docker compose configuration to launch external services (Postgres, Prometheus, Grafana)
+- Integrates the application with Prometheus monitoring system to collect metrics
+- Demonstrates how to connect Grafana with Prometheus to visualize metrics (including importing a pre-built dashboard)
+- Spring Security configuration to secure sensitive actuator endpoints
 
 # Dependencies and requirements
 
@@ -51,7 +66,7 @@ The actuators endpoints are available at [http://localhost:8080/actuator](http:/
 
 By default, only the `health` and `info` endpoints are exposed over HTTP. To expose all the endpoints, the following configuration was added to the `application.yaml` file.
 
-```properties
+```yaml
 management:
   endpoints:
     web:
@@ -300,3 +315,28 @@ To learn about Importing Grafana dashboards, please refer to the [Grafana dashbo
 Source: [Spring Boot Statistics & Endpoint Metrics](https://grafana.com/grafana/dashboards/14430-spring-boot-statistics-endpoint-metrics/)
 
 ![grafana-dashboard.png](src%2Fmain%2Fresources%2Fgrafana-dashboard.png)
+
+# Run the project
+
+To run the project, follow the steps below.
+
+```shell
+mvn spring-boot:run
+```
+
+The application will be available at [http://localhost:8080](http://localhost:8080).
+
+The external services (Postgres, Prometheus, and Grafana) configured in the [docker-compose.yaml](docker-compose.yaml) file will automatically be launched due to the `spring-boot-docker-compose` dependency.
+
+In any case, if you want to run the external services separately, you can run the following command:
+
+```shell
+# Start all the external services
+docker compose up -d
+```
+
+```shell
+# Start a specific service (prometheus, grafana or postgres)
+docker compose up -d <service-name>
+# Replace <service-name> with the service you want to start
+```
